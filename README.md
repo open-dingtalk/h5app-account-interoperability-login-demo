@@ -192,7 +192,8 @@ git clone https://github.com/open-dingtalk/h5app-account-interoperability-login-
 修改完页面后，命令行中（前端项目目录下）执行以下命令，编译打包生成静态资源文件
 
 ```shell
-npm installnpm run build
+npm install
+npm run build
 ```
 
 ③ 将编译好的静态资源放入后端：
