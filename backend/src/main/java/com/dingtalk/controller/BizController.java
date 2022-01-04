@@ -17,7 +17,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/demo")
-public class ApiDingTalkLoginController {
+public class BizController {
 
     @Autowired
     private DingTalkLoginServiceImpl dingTalkLoginService;
