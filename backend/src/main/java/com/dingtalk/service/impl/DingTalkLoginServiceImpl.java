@@ -10,7 +10,6 @@ import com.dingtalk.api.response.OapiUserGetuserinfoResponse;
 import com.dingtalk.service.IDingTalkLoginService;
 import com.dingtalk.utils.DingInfoMethod;
 import com.dingtalk.vo.DingUserVO;
-import com.dingtalk.utils.JsonUtils;
 import com.taobao.api.ApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +24,15 @@ public class DingTalkLoginServiceImpl implements IDingTalkLoginService {
 
     @Autowired
     private DingInfoMethod dingInfoMethod;
+
+    /**
+     * map模拟数据库存储
+     */
+    private static Map<String, JSONObject> userMap = new HashMap<>();
+
+    static {
+        userMap.put("user", null);
+    }
 
     private Logger log = LoggerFactory.getLogger(DingTalkLoginServiceImpl.class);
 
@@ -56,29 +64,18 @@ public class DingTalkLoginServiceImpl implements IDingTalkLoginService {
         String body = response.getBody();
         Map json = (Map) JSON.parse(body);
         String name = json.get("name") == null ? "" : json.get("name").toString();
-        //没有数据库是读取json文件
-        String s = JsonUtils.readJsonFile();
-        if (s == null) {
+        //map模拟数据库读取用户
+        JSONObject jsonObject = userMap.get("user");
+        if (jsonObject == null) {
             returnMap.put("code", 2);
             returnMap.put("dingUserId", userId);
             returnMap.put("name", name);
             return returnMap;
         }
-        JSONObject jsonObject = JSON.parseObject(s);
         if (jsonObject != null) {
-            JSONArray users = jsonObject.getJSONArray("user");//构建JSONArray数组
-            if (users != null) {
-                for (Object user : users) {
-                    JSONObject key = (JSONObject) user;
-                    String dingUserId = ((String) key.get("dingUserId"));
-                    if (dingUserId.equals(userId)) {
-                        // 绑定过直接跳转到详情页
-                        returnMap.put("data", user);
-                        returnMap.put("code", 1);
-                        return returnMap;
-                    }
-                }
-            }
+            returnMap.put("data", jsonObject);
+            returnMap.put("code", 1);
+            return returnMap;
         }
         // 没绑定过就跳转到绑定页
         returnMap.put("code", 2);
@@ -99,23 +96,12 @@ public class DingTalkLoginServiceImpl implements IDingTalkLoginService {
     public Map<String, Object> addUser(DingUserVO dingUserVO) {
         Map<String, Object> returnMap = new HashMap<>();
         JSONObject jsonObject = new JSONObject();
-        String s = JsonUtils.readJsonFile();
-        JSONArray users = new JSONArray();
-        if (s != null) {
-            JSONObject parseObject = JSON.parseObject(s);
-            if (parseObject != null) {
-                users = parseObject.getJSONArray("user");
-            }
-        }
         jsonObject.put("userName", dingUserVO.getUserName());
         jsonObject.put("dingUserName", dingUserVO.getDingUserName());
         jsonObject.put("dingUserId", dingUserVO.getDingUserId());
         jsonObject.put("password", dingUserVO.getPassword());
-        users.add(jsonObject);
-        JSONObject object = new JSONObject();
-        object.put("user", users);
-        Map<String, Object> map = JsonUtils.writeJsonFile(object);
-        if (map.get("code") == "1") {
+        userMap.put("user", jsonObject);
+        if (userMap.get("user") != null) {
             returnMap.put("code", 1);
             returnMap.put("msg", "绑定成功！");
             returnMap.put("dingUserName", dingUserVO.getDingUserName());
