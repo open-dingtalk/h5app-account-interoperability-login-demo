@@ -1,6 +1,7 @@
 package com.dingtalk.utils;
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.util.HashMap;
@@ -10,24 +11,30 @@ import java.util.Map;
  * @author ：ltb
  * @date ：2021/12/30
  */
+@Slf4j
 public class JsonUtils {
 
     private static final String userFileName = "user.json";
 
+    public static void main(String[] args) throws IOException {
+        File file = getFile();
+        System.out.println(file);
+    }
+
+
     private static File getFile() throws IOException {
-        String path = JsonUtils.class.getClassLoader().getResource("").getPath();
-        File dir = new File(path);
-        File file = null;
-        String[] children = dir.list();
-        for (String filename : children) {
-            if(userFileName.equals(filename)){
-                file =  new File(path + filename);
-            }
+        InputStream is = JsonUtils.class.getClassLoader().getResourceAsStream(userFileName);
+        String filePath = JsonUtils.class.getClassLoader().getResource(userFileName).getFile();
+        log.info("filePath:{}", filePath);
+        File file = new File(userFileName);
+        FileOutputStream fos = new FileOutputStream(file);
+        byte[] b = new byte[1024];
+        while ((is.read(b)) != -1) {
+            // 写入数据
+            fos.write(b);
         }
-        if(file == null){
-            file =  new File(path + userFileName);
-            file.createNewFile();
-        }
+        is.close();
+        fos.close();
         return file;
     }
 
@@ -95,8 +102,8 @@ public class JsonUtils {
                 e.printStackTrace();
             }
         }
-        map.put("msg","写入文件成功");
-        map.put("code","1");
+        map.put("msg", "写入文件成功");
+        map.put("code", "1");
         System.out.println("文件写入成功！");
         return map;
     }
