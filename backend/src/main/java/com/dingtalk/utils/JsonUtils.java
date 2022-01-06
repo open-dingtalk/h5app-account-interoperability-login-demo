@@ -72,7 +72,7 @@ public class JsonUtils {
 
     public static Map<String, Object> writeJsonFile(JSONObject data) {
         Map<String, Object> map = new HashMap<>();
-        BufferedWriter writer = null;
+        String filePath = JsonUtils.class.getClassLoader().getResource(userFileName).getFile();
         File file = null;
         try {
             file = getFile();
@@ -89,18 +89,12 @@ public class JsonUtils {
         }
         //写入
         try {
-            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, false), "UTF-8"));
-            writer.write(String.valueOf(data));
+            FileWriter fw = new FileWriter(filePath);
+            // 写入数据
+            fw.write(data.toJSONString());
+            fw.close();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (writer != null) {
-                    writer.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         map.put("msg", "写入文件成功");
         map.put("code", "1");
